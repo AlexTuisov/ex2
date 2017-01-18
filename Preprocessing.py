@@ -6,13 +6,13 @@ def get_path(type_of_file):
     print "____"
     print path
     if type_of_file == "test":
-        absolute_path = os.path.join(path, "test.labeled")
+        absolute_path = os.path.join(path, "data/test.labeled")
     elif type_of_file == "train":
-        absolute_path = os.path.join(path, "train.labeled")
+        absolute_path = os.path.join(path, "data/train.labeled")
     elif type_of_file == "competition":
-        absolute_path = os.path.join(path, "comp.unlabeled")
+        absolute_path = os.path.join(path, "data/comp.unlabeled")
     elif type_of_file == "answers":
-        absolute_path = os.path.join(path, "comp.labeled")
+        absolute_path = os.path.join(path, "data/comp.labeled")
     else:
         raise ValueError("wrong file type requested")
     print absolute_path
