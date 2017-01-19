@@ -21,6 +21,7 @@ def get_path(type_of_file):
 
 def get_file_as_dict(type_of_file):
     formatted_file = {}
+    formatted_graph = {}
     if type_of_file == "train":
         with open(get_path(type_of_file)) as unformatted_train_set:
             is_a_new_sentence = False
@@ -38,7 +39,8 @@ def get_file_as_dict(type_of_file):
                         sentence_as_dictionary[num_of_father]["token child"].append(key)
                     sentence_as_graph = make_graph_for_sentence(sentence_as_dictionary)
                     sentence_as_dictionary[0] = {"token": "root", "token pos": "root", "token head": -1,  "token child": child_of_root}
-                    formatted_file[numerator] = (sentence_as_dictionary, sentence_as_graph)
+                    formatted_file[numerator] = sentence_as_dictionary
+                    formatted_graph[numerator] = sentence_as_graph
                     continue
                 if is_a_new_sentence:
                     sentence_as_dictionary = {}
@@ -49,7 +51,7 @@ def get_file_as_dict(type_of_file):
                                                              "token pos": split_row[3],
                                                              "token head": int(split_row[6]),
                                                              "token child": []}
-    return formatted_file
+    return formatted_file, formatted_graph
 
 
 def make_graph_for_sentence(sentence_as_dict):
