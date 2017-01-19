@@ -5,4 +5,6 @@ if __name__ == '__main__':
     # f = fmaker.Feature_maker(train_dict)
     # f.init_all_features()
 
-    print (train_dict.popitem())
+    random_item = train_dict.popitem()
+    print random_item[1][0]
+    print random_item[1][1]
