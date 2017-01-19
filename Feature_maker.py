@@ -22,7 +22,22 @@ class Feature_maker:
         unigram_ppos = "<<head>>" + sentence[word_data['token head']]['token pos']
         relevant_features.append(unigram_ppos)
 
-        for child in word_data['token child']:
+        unigram_cword_cpos = "<<child>>" + word_data['token'] + self.special_delimiter + word_data['token pos']
+        relevant_features.append(unigram_cword_cpos)
+        unigram_cword = "<<child>>" + "<<child>>" + word_data['token']
+        relevant_features.append(unigram_cword)
+        unigram_cpos = "<<child>>" + word_data['token pos']
+        relevant_features.append(unigram_cpos)
+        bigram_ppos_cword_cpos = unigram_ppos + self.special_delimiter + unigram_cword_cpos
+        relevant_features.append(bigram_ppos_cword_cpos)
+        bigram_pword_ppos_cword = unigram_pword_ppos + self.special_delimiter + unigram_cword
+        relevant_features.append(bigram_pword_ppos_cword)
+        bigram_ppos_cpos = unigram_ppos + self.special_delimiter + unigram_cpos
+        relevant_features.append(bigram_ppos_cpos)
+
+
+
+        """for child in word_data['token child']:
             unigram_cword_cpos = "<<child>>" + sentence[child]['token'] + self.special_delimiter + sentence[child]['token pos']
             relevant_features.append(unigram_cword_cpos)
             unigram_cword = "<<child>>" + sentence[child]['token']
@@ -34,7 +49,7 @@ class Feature_maker:
             bigram_pword_ppos_cword = unigram_pword_ppos + self.special_delimiter + unigram_cword
             relevant_features.append(bigram_pword_ppos_cword)
             bigram_ppos_cpos = unigram_ppos + self.special_delimiter + unigram_cpos
-            relevant_features.append(bigram_ppos_cpos)
+            relevant_features.append(bigram_ppos_cpos)"""
         return relevant_features
 
 
@@ -53,7 +68,6 @@ class Feature_maker:
 
 
 
-    def create_feature_dictioanry_for_all_sentences(self):
-        print("")
+
 
 
