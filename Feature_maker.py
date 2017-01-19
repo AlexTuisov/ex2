@@ -1,13 +1,15 @@
-import scipy as sc
-
+from scipy.sparse import lil_matrix
+from scipy.sparse import csr_matrix
 class Feature_maker:
 
-    def __init__(self,train_data,special_delimiter):
+    def __init__(self,train_data):
         self.train_data=train_data
         self.dimensions = 0
         self.feature_index = {}
         self.reverese_feature_index = {}
-        self.special_delimiter = special_delimiter
+        self.special_delimiter = "@@<<<>>>@@"
+        self.local_feature_dictionary={}
+        self.sentence_feature_dictionary={}
 
     def modify_feature_index(self,feature):
         if feature not in self.feature_index:
@@ -15,7 +17,7 @@ class Feature_maker:
             self.reverese_feature_index[self.dimensions] = feature
             self.dimensions += 1
 
-    def get_relevant_features_basic(self,pword,ppos,cword,cpos,sentence):
+    def get_relevant_features_basic(self,pword,ppos,cword,cpos):
         relevant_features = []
         unigram_pword_ppos = "<<head>>" + pword + self.special_delimiter + ppos
         relevant_features.append(unigram_pword_ppos)
@@ -56,8 +58,12 @@ class Feature_maker:
 
 
     def add_features_basic_model(self,word_data,sentence):
-        pword =sentence[word_data['token head']]['token']
-        ppos =sentence[word_data['token head']]['token pos']
+        ppos = ""
+        pword = ""
+        if word_data['token head']!= -1:
+            pword =sentence[word_data['token head']]['token']
+            ppos =sentence[word_data['token head']]['token pos']
+
         cword =word_data['token']
         cpos = word_data['token pos']
         relevant_features = self.get_relevant_features_basic(pword,ppos,cword,cpos)
@@ -71,30 +77,60 @@ class Feature_maker:
             for word in sentence:
                 word_data = sentence[word]
                 self.add_features_basic_model(word_data,sentence)
+        self.create_feature_vectors_for_all_training_sentences()
+
+
+    def create_feature_vector_from_tree(self,sentence_index,graph):
+        vector = csr_matrix((1,self.dimensions))
+        for parent in graph:
+            for child in graph[parent]:
+                pword = self.train_data[sentence_index][parent]['token']
+                ppos = self.train_data[sentence_index][parent]['token pos']
+                cword= self.train_data[sentence_index][child]['token']
+                cpos = self.train_data[sentence_index][child]['token pos']
+                vector+=self.create_local_feature_vector(pword,ppos,cword,cpos)
+        return vector
+
 
 
     def create_local_feature_vector(self,pword,ppos,cword,cpos):
-        vector = sc.sparse.lil_matrix((1,self.dimensions))
+        vector = lil_matrix((1,self.dimensions))
         relevant_features = self.get_relevant_features_basic(pword,ppos,cword,cpos)
         for feature in relevant_features:
-            vector[1,self.feature_index[feature]]=1
-        return sc.sparse.csc_matrix(vector)
+            if self.feature_index.get(feature,False):
+                index_of_feature =self.feature_index[feature]
+                vector[0,index_of_feature]=1
+        return csr_matrix(vector)
 
-
-    def create_feature_dictionary_for_sentences(self):
-        local_feature_dictionary = {}
+    def create_feature_vectors_for_all_training_sentences(self):
+        dictionary = {}
         for index in self.train_data:
+            dictionary[index] = csr_matrix((1,self.dimensions))
             sentence = self.train_data[index]
-            local_feature_dictionary[index] = {}
             for word_index in sentence:
-                for word_index1 in sentence:
-                    if word_index!=word_index1:
-                        pword = sentence[word_index]['token']
-                        ppos= sentence[word_index]['token pos']
-                        cword = sentence[word_index1]['token']
-                        cpos = sentence[word_index1]['token pos']
-                        local_feature_dictionary[index][word_index][word_index1] = self.create_local_feature_vector(pword,ppos,cword,cpos)
+                pword = sentence[sentence[word_index]['token head']]['token']
+                ppos= sentence[sentence[word_index]['token head']]['token pos']
+                cword = sentence[word_index]['token']
+                cpos = sentence[word_index]['token pos']
+                local_feature_vector = self.create_local_feature_vector(pword,ppos,cword,cpos)
+                dictionary[index] += local_feature_vector
+        self.sentence_feature_dictionary = dictionary
 
+
+
+    def create_weighted_graph_for_sentence(self,sentence_index,weights):
+        local_feature_dictionary = {}
+        sentence = self.train_data[sentence_index]
+        for word_index in sentence:
+            local_feature_dictionary[word_index]={}
+            for word_index1 in sentence:
+                if word_index != word_index1:
+                    pword = sentence[word_index]['token']
+                    ppos= sentence[word_index]['token pos']
+                    cword = sentence[word_index1]['token']
+                    cpos = sentence[word_index1]['token pos']
+                    local_feature_dictionary[word_index][word_index1] = -(self.create_local_feature_vector(pword,ppos,cword,cpos).dot(weights)[0,0])
+        return local_feature_dictionary
 
 
 
