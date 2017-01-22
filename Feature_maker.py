@@ -107,9 +107,13 @@ class Feature_maker:
         for index in self.train_data:
             dictionary[index] = csr_matrix((1,self.dimensions))
             sentence = self.train_data[index]
+
             for word_index in sentence:
-                pword = sentence[sentence[word_index]['token head']]['token']
-                ppos= sentence[sentence[word_index]['token head']]['token pos']
+                pword = ""
+                ppos = ""
+                if sentence[word_index]['token head'] != -1:
+                    pword = sentence[sentence[word_index]['token head']]['token']
+                    ppos= sentence[sentence[word_index]['token head']]['token pos']
                 cword = sentence[word_index]['token']
                 cpos = sentence[word_index]['token pos']
                 local_feature_vector = self.create_local_feature_vector(pword,ppos,cword,cpos)

@@ -6,9 +6,10 @@ import Feature_maker
 
 class Perceptron:
 
-    def __init__(self,feature_maker):
+    def __init__(self,feature_maker,global_iterations):
         self.feature_maker = feature_maker
         self.weights = csr_matrix((1,self.feature_maker.dimensions))
+        self.global_iterations =global_iterations
 
 
     def convert_to_graph_weights(self,sentence_index):
@@ -22,7 +23,18 @@ class Perceptron:
 
         return graph_with_weights
 
-    def run(self):
+
+
+    def compare_trees(self):
         print("")
+
+
+    def run(self):
+        for iteration in xrange(0,self.global_iterations):
+            print("global iteration number: ",iteration)
+            for sentence in self.feature_maker.train_data:
+                graph_with_all_weights = self.feature_maker.create_weighted_graph_for_sentence(sentence,self.weights)
+                maximum_spanning_tree=mst.mst(0,graph_with_all_weights)
+
 
 
