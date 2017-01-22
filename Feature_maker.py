@@ -72,26 +72,33 @@ class Feature_maker:
 
 
     def create_feature_vector_from_tree(self,sentence_index,graph):
-        vector = csr_matrix((1,self.dimensions),dtype=int)
+        #vector = csr_matrix((1,self.dimensions),dtype=int)
+        feature_vector =[]
         for parent in graph:
             for child in graph[parent]:
                 pword = self.train_data[sentence_index][parent]['token']
                 ppos = self.train_data[sentence_index][parent]['token pos']
                 cword= self.train_data[sentence_index][child]['token']
                 cpos = self.train_data[sentence_index][child]['token pos']
-                vector+=self.create_local_feature_vector(pword,ppos,cword,cpos)
-        return vector
+                feature_vector.extend(self.create_local_feature_vector(pword,ppos,cword,cpos))
+        return feature_vector
+
+
+
+
 
 
 
     def create_local_feature_vector(self,pword,ppos,cword,cpos):
-        vector = lil_matrix((1,self.dimensions),dtype=int)
+        #vector = lil_matrix((1,self.dimensions),dtype=int)
         relevant_features = self.get_relevant_features_basic(pword,ppos,cword,cpos)
+        relevant_indexes = []
         for feature in relevant_features:
             if self.feature_index.get(feature,False):
                 index_of_feature =self.feature_index[feature]
-                vector[0,index_of_feature] = 1
-        return vector
+                relevant_indexes.append(index_of_feature)
+                #vector[0,index_of_feature] = 1
+        return relevant_indexes
 
 
     """def create_golden_standard(self):
@@ -107,7 +114,7 @@ class Feature_maker:
     def create_feature_vectors_for_all_training_sentences(self):
         dictionary = {}
         for index in self.train_data:
-            dictionary[index] = csr_matrix((1,self.dimensions))
+            dictionary[index] = []#csr_matrix((1,self.dimensions))
             sentence = self.train_data[index]
 
             for word_index in sentence:
@@ -119,10 +126,14 @@ class Feature_maker:
                 cword = sentence[word_index]['token']
                 cpos = sentence[word_index]['token pos']
                 local_feature_vector = self.create_local_feature_vector(pword,ppos,cword,cpos)
-                dictionary[index] += local_feature_vector
+                dictionary[index].extend(local_feature_vector)
         self.sentence_feature_dictionary = dictionary
 
-
+    def multiply_vectors(self,indexes,weights):
+        result = 0
+        for index in indexes:
+            result += weights[index]
+        return result
 
     def create_weighted_graph_for_sentence(self,sentence_index,weights):
         local_feature_dictionary = {}
@@ -135,7 +146,7 @@ class Feature_maker:
                     ppos= sentence[word_index]['token pos']
                     cword = sentence[word_index1]['token']
                     cpos = sentence[word_index1]['token pos']
-                    local_feature_dictionary[word_index][word_index1] = -(self.create_local_feature_vector(pword,ppos,cword,cpos).dot(weights)[0, 0])
+                    local_feature_dictionary[word_index][word_index1] = -(self.multiply_vectors(self.create_local_feature_vector(pword,ppos,cword,cpos),weights))
         return local_feature_dictionary
 
 
