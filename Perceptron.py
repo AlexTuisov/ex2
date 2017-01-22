@@ -1,7 +1,7 @@
 
 
 from scipy.sparse import csr_matrix
-import mst as mst
+import MST as mst
 import Feature_maker
 
 class Perceptron:

@@ -1,7 +1,7 @@
 import Preprocessing as Pre
 import Feature_maker as fmaker
 import Perceptron as P
-import mst
+import MST
 import numpy as np
 from scipy.sparse import csr_matrix
 import time
@@ -21,5 +21,5 @@ if __name__ == '__main__':
     print("it took ",time.time()-begin)
     print("graph with weights:")
     print(graph_with_weights)
-    value = mst.mst(0,graph_with_weights)
+    value = MST.mst(0, graph_with_weights)
     print (value)
