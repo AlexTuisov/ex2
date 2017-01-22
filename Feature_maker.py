@@ -2,7 +2,7 @@ from scipy.sparse import lil_matrix
 from scipy.sparse import csr_matrix
 class Feature_maker:
 
-    def __init__(self,train_data):
+    def __init__(self,train_data,golden_standard):
         self.train_data=train_data
         self.dimensions = 0
         self.feature_index = {}
@@ -10,6 +10,7 @@ class Feature_maker:
         self.special_delimiter = "@@<<<>>>@@"
         self.local_feature_dictionary={}
         self.sentence_feature_dictionary={}
+        self.golden_standard =golden_standard
 
     def modify_feature_index(self,feature):
         if feature not in self.feature_index:
@@ -101,6 +102,17 @@ class Feature_maker:
                 index_of_feature =self.feature_index[feature]
                 vector[0,index_of_feature]=1
         return csr_matrix(vector)
+
+
+    """def create_golden_standard(self):
+        trees={}
+        for sentence in self.train_data:
+            trees[sentence]={}
+            for word_data in self.train_data[sentence]:
+                trees[sentence][word_data]={}
+                for child in self.train_data[sentence][word_data]["token child"]:
+                    trees[sentence][word_data][child]=0
+        self.golden_standard = trees"""
 
     def create_feature_vectors_for_all_training_sentences(self):
         dictionary = {}
