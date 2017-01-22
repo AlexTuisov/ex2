@@ -91,7 +91,7 @@ class Feature_maker:
             if self.feature_index.get(feature,False):
                 index_of_feature =self.feature_index[feature]
                 vector[0,index_of_feature] = 1
-        return csr_matrix(vector)
+        return vector
 
 
     """def create_golden_standard(self):
