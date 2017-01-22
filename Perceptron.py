@@ -32,9 +32,10 @@ class Perceptron:
 
     def run(self):
         for iteration in xrange(0, self.global_iterations):
-            print("global iteration number: ", iteration)
+            print("global iteration number: ", iteration+1)
             for sentence in self.feature_maker.train_data:
-                graph_with_all_weights = self.feature_maker.create_weighted_graph_for_sentence(sentence, self.weights)
+                print ("working on sentence number ",sentence)
+                graph_with_all_weights = self.feature_maker.create_weighted_graph_for_sentence(sentence, self.weights.transpose())
                 maximum_spanning_tree = mst.mst(0, graph_with_all_weights)
                 golden_standard = self.feature_maker.golden_standard[sentence]
                 if not self.compare_trees(maximum_spanning_tree, golden_standard):

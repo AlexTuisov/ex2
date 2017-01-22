@@ -78,7 +78,9 @@ class Feature_maker:
             for word in sentence:
                 word_data = sentence[word]
                 self.add_features_basic_model(word_data,sentence)
+        print("finished feature index creation")
         self.create_feature_vectors_for_all_training_sentences()
+        print("finished creating feature vector for all sentences")
 
 
     def create_feature_vector_from_tree(self,sentence_index,graph):
