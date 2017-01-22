@@ -15,10 +15,9 @@ if __name__ == '__main__':
     begin = time.time()
     weights = csr_matrix((1, f.dimensions))
 
-
     graph_with_weights = f.create_weighted_graph_for_sentence(1,weights.transpose())
 
-    print("it took ",time.time()-begin)
+    print("it took ", time.time()-begin)
     print("graph with weights:")
     print(graph_with_weights)
     value = MST.mst(0, graph_with_weights)

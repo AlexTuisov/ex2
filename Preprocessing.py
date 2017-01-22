@@ -38,7 +38,8 @@ def get_file_as_dict(type_of_file):
                             continue
                         sentence_as_dictionary[num_of_father]["token child"].append(key)
                     sentence_as_graph = make_graph_for_sentence(sentence_as_dictionary)
-                    sentence_as_dictionary[0] = {"token": "root", "token pos": "root", "token head": -1,  "token child": child_of_root}
+                    sentence_as_dictionary[0] = {"token": "root", "token pos": "root", "token head": -1,
+                                                 "token child": child_of_root}
                     formatted_file[numerator] = sentence_as_dictionary
                     formatted_graph[numerator] = sentence_as_graph
                     continue
