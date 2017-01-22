@@ -1,5 +1,6 @@
 from scipy.sparse import lil_matrix
 from scipy.sparse import csr_matrix
+from numba import jit
 class Feature_maker:
 
     def __init__(self,train_data,golden_standard):
@@ -18,6 +19,7 @@ class Feature_maker:
             self.reverese_feature_index[self.dimensions] = feature
             self.dimensions += 1
 
+
     def get_relevant_features_basic(self,pword,ppos,cword,cpos):
         relevant_features = []
         unigram_pword_ppos = "<<head>>" + pword + self.special_delimiter + ppos
@@ -29,32 +31,18 @@ class Feature_maker:
 
         unigram_cword_cpos = "<<child>>" + cword + self.special_delimiter + cpos
         relevant_features.append(unigram_cword_cpos)
+
         unigram_cword = "<<child>>" + cword
         relevant_features.append(unigram_cword)
-        unigram_cpos = "<<child>>"+cword
+        unigram_cpos = "<<child>>"+cpos
         relevant_features.append(unigram_cpos)
-        bigram_ppos_cword_cpos = unigram_ppos + self.special_delimiter + unigram_cword_cpos
+
+        bigram_ppos_cword_cpos =  "<<head>>" + ppos + self.special_delimiter + unigram_cword_cpos
         relevant_features.append(bigram_ppos_cword_cpos)
-        bigram_pword_ppos_cword = unigram_pword_ppos + self.special_delimiter + unigram_cword
+        bigram_pword_ppos_cword = unigram_pword_ppos + self.special_delimiter + "<<child>>" + cword
         relevant_features.append(bigram_pword_ppos_cword)
-        bigram_ppos_cpos = unigram_ppos + self.special_delimiter + unigram_cpos
+        bigram_ppos_cpos =  "<<head>>" + ppos + self.special_delimiter + "<<child>>"+cpos
         relevant_features.append(bigram_ppos_cpos)
-
-
-
-        """for child in word_data['token child']:
-            unigram_cword_cpos = "<<child>>" + sentence[child]['token'] + self.special_delimiter + sentence[child]['token pos']
-            relevant_features.append(unigram_cword_cpos)
-            unigram_cword = "<<child>>" + sentence[child]['token']
-            relevant_features.append(unigram_cword)
-            unigram_cpos = "<<child>>" + sentence[child]['token pos']
-            relevant_features.append(unigram_cpos)
-            bigram_ppos_cword_cpos = unigram_ppos + self.special_delimiter + unigram_cword_cpos
-            relevant_features.append(bigram_ppos_cword_cpos)
-            bigram_pword_ppos_cword = unigram_pword_ppos + self.special_delimiter + unigram_cword
-            relevant_features.append(bigram_pword_ppos_cword)
-            bigram_ppos_cpos = unigram_ppos + self.special_delimiter + unigram_cpos
-            relevant_features.append(bigram_ppos_cpos)"""
         return relevant_features
 
 
@@ -84,7 +72,7 @@ class Feature_maker:
 
 
     def create_feature_vector_from_tree(self,sentence_index,graph):
-        vector = csr_matrix((1,self.dimensions))
+        vector = csr_matrix((1,self.dimensions),dtype=int)
         for parent in graph:
             for child in graph[parent]:
                 pword = self.train_data[sentence_index][parent]['token']
@@ -97,12 +85,12 @@ class Feature_maker:
 
 
     def create_local_feature_vector(self,pword,ppos,cword,cpos):
-        vector = lil_matrix((1,self.dimensions))
+        vector = lil_matrix((1,self.dimensions),dtype=int)
         relevant_features = self.get_relevant_features_basic(pword,ppos,cword,cpos)
         for feature in relevant_features:
             if self.feature_index.get(feature,False):
                 index_of_feature =self.feature_index[feature]
-                vector[0,index_of_feature]=1
+                vector[0,index_of_feature] = 1
         return csr_matrix(vector)
 
 
@@ -147,9 +135,20 @@ class Feature_maker:
                     ppos= sentence[word_index]['token pos']
                     cword = sentence[word_index1]['token']
                     cpos = sentence[word_index1]['token pos']
-                    local_feature_dictionary[word_index][word_index1] = -(self.create_local_feature_vector(pword,ppos,cword,cpos).dot(weights)[0,0])
+                    local_feature_dictionary[word_index][word_index1] = -(self.create_local_feature_vector(pword,ppos,cword,cpos).dot(weights)[0, 0])
         return local_feature_dictionary
 
 
-
-
+"""for child in word_data['token child']:
+    unigram_cword_cpos = "<<child>>" + sentence[child]['token'] + self.special_delimiter + sentence[child]['token pos']
+    relevant_features.append(unigram_cword_cpos)
+    unigram_cword = "<<child>>" + sentence[child]['token']
+    relevant_features.append(unigram_cword)
+    unigram_cpos = "<<child>>" + sentence[child]['token pos']
+    relevant_features.append(unigram_cpos)
+    bigram_ppos_cword_cpos = unigram_ppos + self.special_delimiter + unigram_cword_cpos
+    relevant_features.append(bigram_ppos_cword_cpos)
+    bigram_pword_ppos_cword = unigram_pword_ppos + self.special_delimiter + unigram_cword
+    relevant_features.append(bigram_pword_ppos_cword)
+    bigram_ppos_cpos = unigram_ppos + self.special_delimiter + unigram_cpos
+    relevant_features.append(bigram_ppos_cpos)"""

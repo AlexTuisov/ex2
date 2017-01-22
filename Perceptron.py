@@ -2,14 +2,14 @@
 
 from scipy.sparse import csr_matrix
 import MST as mst
-import Feature_maker
+import time
 
 
 class Perceptron:
 
     def __init__(self,feature_maker,global_iterations):
         self.feature_maker = feature_maker
-        self.weights = csr_matrix((1,self.feature_maker.dimensions))
+        self.weights = csr_matrix((1,self.feature_maker.dimensions),dtype=int)
         self.global_iterations = global_iterations
 
     def convert_to_graph_weights(self,sentence_index):
@@ -31,8 +31,9 @@ class Perceptron:
         return True
 
     def run(self):
-        for iteration in xrange(0, self.global_iterations):
+        for iteration in range(0, self.global_iterations):
             print("global iteration number: ", iteration+1)
+            begin = time.time()
             for sentence in self.feature_maker.train_data:
                 print ("working on sentence number ",sentence)
                 graph_with_all_weights = self.feature_maker.create_weighted_graph_for_sentence(sentence, self.weights.transpose())
@@ -41,6 +42,8 @@ class Perceptron:
                 if not self.compare_trees(maximum_spanning_tree, golden_standard):
                     self.weights += (self.feature_maker.sentence_feature_dictionary[sentence] -
                                      self.feature_maker.create_feature_vector_from_tree(sentence, maximum_spanning_tree))
+                if sentence%100 == 0:
+                    print("took ",time.time()-begin)
         return self.weights
 
 

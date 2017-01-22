@@ -3,8 +3,8 @@ import os
 
 def get_path(type_of_file):
     path = os.path.dirname(__file__)
-    print "____"
-    print path
+    print ("____")
+    print (path)
     if type_of_file == "test":
         absolute_path = os.path.join(path, "data/test.labeled")
     elif type_of_file == "train":
@@ -15,7 +15,7 @@ def get_path(type_of_file):
         absolute_path = os.path.join(path, "data/comp.labeled")
     else:
         raise ValueError("wrong file type requested")
-    print absolute_path
+    print (absolute_path)
     return absolute_path
 
 
