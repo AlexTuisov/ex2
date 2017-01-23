@@ -42,8 +42,8 @@ class Feature_maker:
         relevant_features.append(bigram_ppos_cword_cpos)
         bigram_pword_ppos_cword = unigram_pword_ppos + self.special_delimiter + "<<child>>" + cword
         relevant_features.append(bigram_pword_ppos_cword)
-        bigram_ppos_cpos =  "<<head>>" + ppos + self.special_delimiter + "<<child>>"+cpos
-        relevant_features.append(bigram_ppos_cpos)
+        #bigram_ppos_cpos =  "<<head>>" + ppos + self.special_delimiter + "<<child>>"+cpos
+        #relevant_features.append(bigram_ppos_cpos)
         return relevant_features
 
 
@@ -68,7 +68,7 @@ class Feature_maker:
             ppos = sentence[word_data['token head']]['token pos']
         cword = word_data['token']
         cpos = word_data['token pos']
-        relevant_features = self.get_features_extended_model(pword, ppos, cword, cpos,word_data['token head'],cindex)
+        relevant_features = self.get_features_extended_model(pword, ppos, cword, cpos,word_data['token head'],cindex,sentence)
         for feature in relevant_features:
             self.modify_feature_index(feature)
 
@@ -94,10 +94,10 @@ class Feature_maker:
                 ppos = self.train_data[sentence_index][parent]['token pos']
                 cword= self.train_data[sentence_index][child]['token']
                 cpos = self.train_data[sentence_index][child]['token pos']
-                feature_vector.extend(self.create_local_feature_vector(pword,ppos,cword,cpos,parent,child))
+                feature_vector.extend(self.create_local_feature_vector(pword,ppos,cword,cpos,parent,child, self.train_data[sentence_index]))
         return feature_vector
 
-    def create_local_feature_vector(self,pword,ppos,cword,cpos,parent,child):
+    def create_local_feature_vector(self,pword,ppos,cword,cpos,parent,child, sentence):
         relevant_features = self.get_relevant_features_basic(pword,ppos,cword,cpos)
         relevant_indexes = []
         for feature in relevant_features:
@@ -105,7 +105,7 @@ class Feature_maker:
                 index_of_feature =self.feature_index[feature]
                 relevant_indexes.append(index_of_feature)
         if self.extended:
-            relevant_features_extended = self.get_features_extended_model(pword, ppos ,cword,cpos,parent,child)
+            relevant_features_extended = self.get_features_extended_model(pword, ppos ,cword,cpos,parent,child,sentence)
             for feature in relevant_features_extended:
                 if self.feature_index.get(feature, False):
                     index_of_feature = self.feature_index[feature]
@@ -113,12 +113,29 @@ class Feature_maker:
         return relevant_indexes
 
 
-    def get_features_extended_model(self, pword, ppos, cword, cpos, parent_index, child_index):
+    def get_features_extended_model(self, pword, ppos, cword, cpos, parent_index, child_index, sentence):
         extended_features = []
         ppos_cpos_length = ppos+self.special_delimiter+cpos+self.special_delimiter+str(abs(parent_index-child_index))
         extended_features.append(ppos_cpos_length)
         pword_cword_length = pword+self.special_delimiter+cword+self.special_delimiter+str(abs(parent_index-child_index))
         extended_features.append(pword_cword_length)
+        for word_index in range(parent_index+1,child_index-1):
+            word_data = sentence[word_index]
+            bpos = word_data['token pos']
+            in_between_feature = ppos+self.special_delimiter+bpos+self.special_delimiter+cpos
+            extended_features.append(in_between_feature)
+        if (parent_index + 1) < len(sentence) and (child_index-1) > -1:
+            ppos_pposplusone_cposminusone_cpos =self.special_delimiter.join((ppos,sentence[parent_index+1]['token pos'],sentence[child_index-1]['token pos'],cpos))
+            extended_features.append(ppos_pposplusone_cposminusone_cpos)
+        if (parent_index-1) > -1 and (child_index-1) > -1:
+            pposminusone_ppos_cposminusone_cpos =self.special_delimiter.join((sentence[parent_index-1]['token pos'],ppos,sentence[child_index-1]['token pos'],cpos))
+            extended_features.append(pposminusone_ppos_cposminusone_cpos)
+        if (parent_index+1) < len(sentence) and (child_index+1) < len(sentence):
+            ppos_pposplusone_cpos_cpospulsone = self.special_delimiter.join((ppos,sentence[parent_index+1]['token pos'],cpos,sentence[child_index+1]['token pos']))
+            extended_features.append(ppos_pposplusone_cpos_cpospulsone)
+        if (parent_index-1) > -1 and (child_index+1) < len(sentence):
+            pposminusone_ppos_cpos_cposplusone = self.special_delimiter.join((sentence[parent_index-1]['token pos'],ppos,cpos,sentence[child_index+1]['token pos']))
+            extended_features.append(pposminusone_ppos_cpos_cposplusone)
         return extended_features
 
 
@@ -146,7 +163,7 @@ class Feature_maker:
                     ppos= sentence[sentence[word_index]['token head']]['token pos']
                 cword = sentence[word_index]['token']
                 cpos = sentence[word_index]['token pos']
-                local_feature_vector = self.create_local_feature_vector(pword,ppos,cword,cpos,sentence[word_index]['token head'],word_index)
+                local_feature_vector = self.create_local_feature_vector(pword,ppos,cword,cpos,sentence[word_index]['token head'],word_index, sentence)
                 dictionary[index].extend(local_feature_vector)
         self.sentence_feature_dictionary = dictionary
 
@@ -167,7 +184,7 @@ class Feature_maker:
                     ppos= sentence[word_index]['token pos']
                     cword = sentence[word_index1]['token']
                     cpos = sentence[word_index1]['token pos']
-                    local_feature_dictionary[word_index][word_index1] = -(self.multiply_vectors(self.create_local_feature_vector(pword,ppos,cword,cpos,word_index,word_index1),weights))
+                    local_feature_dictionary[word_index][word_index1] = -(self.multiply_vectors(self.create_local_feature_vector(pword,ppos,cword,cpos,word_index,word_index1, sentence),weights))
         return local_feature_dictionary
 
 
