@@ -129,7 +129,6 @@ class Feature_maker:
                 dictionary[index].extend(local_feature_vector)
         self.sentence_feature_dictionary = dictionary
 
-    @jit
     def multiply_vectors(self,indexes,weights):
         result = 0
         for index in indexes:

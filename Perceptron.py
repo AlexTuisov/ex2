@@ -29,8 +29,6 @@ class Perceptron:
     def compare_trees(self, mst_tree, true_tree):
         for parent in mst_tree:
             to_check = set(mst_tree[parent].keys())
-            print(to_check)
-            print(set(true_tree[parent]))
             if to_check != set(true_tree[parent]):
                 return False
         return True
@@ -38,17 +36,17 @@ class Perceptron:
     def number_of_correct(self,mst_tree,true_tree):
         correct = 0
         for parent in mst_tree:
-            correct +=  set(mst_tree[parent]).intersection(set(true_tree[parent]))
+            correct +=  len(set(mst_tree[parent].keys()).intersection(set(true_tree[parent])))
         return correct
 
     def run(self):
         self.init_weights()
         begin = time.time()
         for iteration in range(0, self.global_iterations):
-            print("global iteration number: ", iteration+1)
+            #print("global iteration number: ", iteration+1)
 
             for sentence in self.feature_maker.train_data:
-                # print("working on sentence number ",sentence)
+             #   print("working on sentence number ",sentence)
                 graph_with_all_weights = self.feature_maker.create_weighted_graph_for_sentence(sentence, self.weights,self.feature_maker.train_data)
                 maximum_spanning_tree = mst.mst(0, graph_with_all_weights)
                 golden_standard = self.feature_maker.golden_standard[sentence]
