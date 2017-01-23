@@ -12,7 +12,7 @@ if __name__ == '__main__':
     init_start = time.time()
     f.init_all_features_indexes()
     print("initialization of features took ",time.time()-init_start)
-    p = P.Perceptron(f,1)
-    begin = time.time()
-    print(p.run())
-    print ("one iteration of perceptron took ",time.time()-begin)
+    p = P.Perceptron(f,20)
+    p.run()
+    test_set = Pre.get_file_as_dict("test")[0]
+

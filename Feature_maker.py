@@ -129,15 +129,16 @@ class Feature_maker:
                 dictionary[index].extend(local_feature_vector)
         self.sentence_feature_dictionary = dictionary
 
+    @jit
     def multiply_vectors(self,indexes,weights):
         result = 0
         for index in indexes:
             result += weights[index]
         return result
 
-    def create_weighted_graph_for_sentence(self,sentence_index,weights):
+    def create_weighted_graph_for_sentence(self, sentence_index, weights, set):
         local_feature_dictionary = {}
-        sentence = self.train_data[sentence_index]
+        sentence = set[sentence_index]
         for word_index in sentence:
             local_feature_dictionary[word_index]={}
             for word_index1 in sentence:
