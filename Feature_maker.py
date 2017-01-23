@@ -1,9 +1,9 @@
-from scipy.sparse import lil_matrix
-from scipy.sparse import csr_matrix
-from numba import jit
+
+import math
+
 class Feature_maker:
 
-    def __init__(self,train_data,golden_standard):
+    def __init__(self,train_data,golden_standard,extended):
         self.train_data=train_data
         self.dimensions = 0
         self.feature_index = {}
@@ -12,6 +12,7 @@ class Feature_maker:
         self.local_feature_dictionary={}
         self.sentence_feature_dictionary={}
         self.golden_standard =golden_standard
+        self.extended = extended
 
     def modify_feature_index(self,feature):
         if feature not in self.feature_index:
@@ -37,7 +38,7 @@ class Feature_maker:
         unigram_cpos = "<<child>>"+cpos
         relevant_features.append(unigram_cpos)
 
-        bigram_ppos_cword_cpos =  "<<head>>" + ppos + self.special_delimiter + unigram_cword_cpos
+        bigram_ppos_cword_cpos = "<<head>>" + ppos + self.special_delimiter + unigram_cword_cpos
         relevant_features.append(bigram_ppos_cword_cpos)
         bigram_pword_ppos_cword = unigram_pword_ppos + self.special_delimiter + "<<child>>" + cword
         relevant_features.append(bigram_pword_ppos_cword)
@@ -59,6 +60,18 @@ class Feature_maker:
         for feature in relevant_features:
             self.modify_feature_index(feature)
 
+    def add_features_extended_model(self,word_data,sentence,cindex):
+        ppos = ""
+        pword = ""
+        if word_data['token head'] != -1:
+            pword = sentence[word_data['token head']]['token']
+            ppos = sentence[word_data['token head']]['token pos']
+        cword = word_data['token']
+        cpos = word_data['token pos']
+        relevant_features = self.get_features_extended_model(pword, ppos, cword, cpos,word_data['token head'],cindex)
+        for feature in relevant_features:
+            self.modify_feature_index(feature)
+
 
     def init_all_features_indexes(self):
         for index in self.train_data:
@@ -66,13 +79,14 @@ class Feature_maker:
             for word in sentence:
                 word_data = sentence[word]
                 self.add_features_basic_model(word_data,sentence)
+                if self.extended:
+                    self.add_features_extended_model(word_data,sentence,word)
         print("finished feature index creation")
         self.create_feature_vectors_for_all_training_sentences()
         print("finished creating feature vector for all sentences")
 
 
     def create_feature_vector_from_tree(self,sentence_index,graph):
-        #vector = csr_matrix((1,self.dimensions),dtype=int)
         feature_vector =[]
         for parent in graph:
             for child in graph[parent]:
@@ -80,25 +94,32 @@ class Feature_maker:
                 ppos = self.train_data[sentence_index][parent]['token pos']
                 cword= self.train_data[sentence_index][child]['token']
                 cpos = self.train_data[sentence_index][child]['token pos']
-                feature_vector.extend(self.create_local_feature_vector(pword,ppos,cword,cpos))
+                feature_vector.extend(self.create_local_feature_vector(pword,ppos,cword,cpos,parent,child))
         return feature_vector
 
-
-
-
-
-
-
-    def create_local_feature_vector(self,pword,ppos,cword,cpos):
-        #vector = lil_matrix((1,self.dimensions),dtype=int)
+    def create_local_feature_vector(self,pword,ppos,cword,cpos,parent,child):
         relevant_features = self.get_relevant_features_basic(pword,ppos,cword,cpos)
         relevant_indexes = []
         for feature in relevant_features:
             if self.feature_index.get(feature,False):
                 index_of_feature =self.feature_index[feature]
                 relevant_indexes.append(index_of_feature)
-                #vector[0,index_of_feature] = 1
+        if self.extended:
+            relevant_features_extended = self.get_features_extended_model(pword, ppos ,cword,cpos,parent,child)
+            for feature in relevant_features_extended:
+                if self.feature_index.get(feature, False):
+                    index_of_feature = self.feature_index[feature]
+                    relevant_indexes.append(index_of_feature)
         return relevant_indexes
+
+
+    def get_features_extended_model(self, pword, ppos, cword, cpos, parent_index, child_index):
+        extended_features = []
+        ppos_cpos_length = ppos+self.special_delimiter+cpos+self.special_delimiter+str(abs(parent_index-child_index))
+        extended_features.append(ppos_cpos_length)
+        pword_cword_length = pword+self.special_delimiter+cword+self.special_delimiter+str(abs(parent_index-child_index))
+        extended_features.append(pword_cword_length)
+        return extended_features
 
 
     """def create_golden_standard(self):
@@ -125,7 +146,7 @@ class Feature_maker:
                     ppos= sentence[sentence[word_index]['token head']]['token pos']
                 cword = sentence[word_index]['token']
                 cpos = sentence[word_index]['token pos']
-                local_feature_vector = self.create_local_feature_vector(pword,ppos,cword,cpos)
+                local_feature_vector = self.create_local_feature_vector(pword,ppos,cword,cpos,sentence[word_index]['token head'],word_index)
                 dictionary[index].extend(local_feature_vector)
         self.sentence_feature_dictionary = dictionary
 
@@ -146,7 +167,7 @@ class Feature_maker:
                     ppos= sentence[word_index]['token pos']
                     cword = sentence[word_index1]['token']
                     cpos = sentence[word_index1]['token pos']
-                    local_feature_dictionary[word_index][word_index1] = -(self.multiply_vectors(self.create_local_feature_vector(pword,ppos,cword,cpos),weights))
+                    local_feature_dictionary[word_index][word_index1] = -(self.multiply_vectors(self.create_local_feature_vector(pword,ppos,cword,cpos,word_index,word_index1),weights))
         return local_feature_dictionary
 
 
