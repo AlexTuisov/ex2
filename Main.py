@@ -6,8 +6,7 @@ import numpy as np
 from scipy.sparse import csr_matrix
 import time
 if __name__ == '__main__':
-    train_dict = Pre.get_file_as_dict("train")[0]
-    golden_standard = Pre.get_file_as_dict("train")[1]
+    train_dict, golden_standard = Pre.get_file_as_dict("test")
     f = fmaker.Feature_maker(train_dict,golden_standard)
     init_start = time.time()
     f.init_all_features_indexes()
