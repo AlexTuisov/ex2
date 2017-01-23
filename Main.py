@@ -14,4 +14,4 @@ if __name__ == '__main__':
         p = P.Perceptron(f, iteration)
         p.run()
         test_set,golden = Pre.get_file_as_dict("test")
-        p.inference(test_set,False,golden)
+        p.inference(test_set, False, golden)
