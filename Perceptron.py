@@ -68,5 +68,5 @@ class Perceptron:
                 correct += self.number_of_correct(maximum_spanning_tree,golden_standard)
                 total += len(test_set[sentence])
         accuracy = float(float(correct)/total)
-        print("The final accuracy is ")
+        print("The final accuracy is ",accuracy," achieved with ",self.global_iterations," iterations")
 
