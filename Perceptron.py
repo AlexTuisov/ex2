@@ -69,4 +69,4 @@ class Perceptron:
                 total += (len(test_set[sentence])-1)
         accuracy = float(float(correct)/total)
         print("The final accuracy is ",accuracy," achieved with ",self.global_iterations," iterations")
-
+        return accuracy
