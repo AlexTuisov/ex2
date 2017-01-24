@@ -9,7 +9,7 @@ if __name__ == '__main__':
     init_start = time.time()
     f.init_all_features_indexes()
     print("initialization of features took ",time.time()-init_start)
-    iterations =[3]
+    iterations =[20]
     for iteration in iterations:
         p = P.Perceptron(f, iteration)
         p.run()

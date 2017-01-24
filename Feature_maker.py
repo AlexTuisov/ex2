@@ -28,7 +28,7 @@ class Feature_maker:
         #relevant_features.append(unigram_pword_ppos)
 
         unigram_pword = "<<head>>" + pword
-        relevant_features.append(unigram_pword)
+        #relevant_features.append(unigram_pword)
         unigram_ppos = "<<head>>" + ppos
         relevant_features.append(unigram_ppos)
 
@@ -36,7 +36,7 @@ class Feature_maker:
         #relevant_features.append(unigram_cword_cpos)
 
         unigram_cword = "<<child>>" + cword
-        relevant_features.append(unigram_cword)
+        #relevant_features.append(unigram_cword)
         unigram_cpos = "<<child>>"+cpos
         relevant_features.append(unigram_cpos)
 
@@ -140,6 +140,10 @@ class Feature_maker:
         if (parent_index-1) > -1 and (child_index+1) < len(sentence):
             pposminusone_ppos_cpos_cposplusone = self.special_delimiter.join((sentence[parent_index-1]['token pos'],ppos,cpos,sentence[child_index+1]['token pos']))
             extended_features.append(pposminusone_ppos_cpos_cposplusone)
+        if min(parent_index,child_index) == child_index:
+            extended_features.append(ppos+self.special_delimiter+cpos+self.special_delimiter+"<<child>>")
+        else:
+            extended_features.append(ppos + self.special_delimiter + cpos + self.special_delimiter + "<<parent>>")
         return extended_features
 
 
