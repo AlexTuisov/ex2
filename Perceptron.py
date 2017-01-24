@@ -66,7 +66,7 @@ class Perceptron:
             if not real_test:
                 golden_standard = golden_set[sentence]
                 correct += self.number_of_correct(maximum_spanning_tree,golden_standard)
-                total += len(test_set[sentence])
+                total += (len(test_set[sentence])-1)
         accuracy = float(float(correct)/total)
         print("The final accuracy is ",accuracy," achieved with ",self.global_iterations," iterations")
 
