@@ -9,9 +9,10 @@ if __name__ == '__main__':
     init_start = time.time()
     f.init_all_features_indexes()
     print("initialization of features took ",time.time()-init_start)
-    iterations =[20]
+    iterations =[3]
     for iteration in iterations:
         p = P.Perceptron(f, iteration)
         p.run()
         test_set,golden = Pre.get_file_as_dict("test")
         p.inference(test_set, False, golden)
+

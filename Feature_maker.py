@@ -23,15 +23,17 @@ class Feature_maker:
 
     def get_relevant_features_basic(self,pword,ppos,cword,cpos):
         relevant_features = []
+
         unigram_pword_ppos = "<<head>>" + pword + self.special_delimiter + ppos
-        relevant_features.append(unigram_pword_ppos)
+        #relevant_features.append(unigram_pword_ppos)
+
         unigram_pword = "<<head>>" + pword
         relevant_features.append(unigram_pword)
         unigram_ppos = "<<head>>" + ppos
         relevant_features.append(unigram_ppos)
 
         unigram_cword_cpos = "<<child>>" + cword + self.special_delimiter + cpos
-        relevant_features.append(unigram_cword_cpos)
+        #relevant_features.append(unigram_cword_cpos)
 
         unigram_cword = "<<child>>" + cword
         relevant_features.append(unigram_cword)
@@ -119,7 +121,9 @@ class Feature_maker:
         extended_features.append(ppos_cpos_length)
         pword_cword_length = pword+self.special_delimiter+cword+self.special_delimiter+str(abs(parent_index-child_index))
         extended_features.append(pword_cword_length)
-        for word_index in range(parent_index+1,child_index-1):
+        end = max(parent_index,child_index)
+        start = min(parent_index,child_index)
+        for word_index in range(start+1, end-1):
             word_data = sentence[word_index]
             bpos = word_data['token pos']
             in_between_feature = ppos+self.special_delimiter+bpos+self.special_delimiter+cpos
@@ -139,15 +143,7 @@ class Feature_maker:
         return extended_features
 
 
-    """def create_golden_standard(self):
-        trees={}
-        for sentence in self.train_data:
-            trees[sentence]={}
-            for word_data in self.train_data[sentence]:
-                trees[sentence][word_data]={}
-                for child in self.train_data[sentence][word_data]["token child"]:
-                    trees[sentence][word_data][child]=0
-        self.golden_standard = trees"""
+
 
     def create_feature_vectors_for_all_training_sentences(self):
         dictionary = {}
@@ -186,18 +182,3 @@ class Feature_maker:
                     cpos = sentence[word_index1]['token pos']
                     local_feature_dictionary[word_index][word_index1] = -(self.multiply_vectors(self.create_local_feature_vector(pword,ppos,cword,cpos,word_index,word_index1, sentence),weights))
         return local_feature_dictionary
-
-
-"""for child in word_data['token child']:
-    unigram_cword_cpos = "<<child>>" + sentence[child]['token'] + self.special_delimiter + sentence[child]['token pos']
-    relevant_features.append(unigram_cword_cpos)
-    unigram_cword = "<<child>>" + sentence[child]['token']
-    relevant_features.append(unigram_cword)
-    unigram_cpos = "<<child>>" + sentence[child]['token pos']
-    relevant_features.append(unigram_cpos)
-    bigram_ppos_cword_cpos = unigram_ppos + self.special_delimiter + unigram_cword_cpos
-    relevant_features.append(bigram_ppos_cword_cpos)
-    bigram_pword_ppos_cword = unigram_pword_ppos + self.special_delimiter + unigram_cword
-    relevant_features.append(bigram_pword_ppos_cword)
-    bigram_ppos_cpos = unigram_ppos + self.special_delimiter + unigram_cpos
-    relevant_features.append(bigram_ppos_cpos)"""
