@@ -18,8 +18,8 @@ if __name__ == '__main__':
         init_start = time.time()
         f.init_all_features_indexes()
         print("initialization of features took ", time.time()-init_start)
-        iterations = [1, 1, 1, 1]
-        makers = [f]*4
+        iterations = []
+        makers = [f]*1
         input_pool = zip(iterations, makers)
         list_of_accuracies = my_pool.starmap(accuracy_measure, input_pool)
         print (list_of_accuracies)

@@ -14,6 +14,7 @@ class Feature_maker:
         self.golden_standard =golden_standard
         self.extended = extended
 
+
     def modify_feature_index(self,feature):
         if feature not in self.feature_index:
             self.feature_index[feature] = self.dimensions
@@ -142,8 +143,23 @@ class Feature_maker:
             extended_features.append(pposminusone_ppos_cpos_cposplusone)
         if min(parent_index,child_index) == child_index:
             extended_features.append(ppos+self.special_delimiter+cpos+self.special_delimiter+"<<child>>")
+            extended_features.append(pword+self.special_delimiter+cword+self.special_delimiter+"<<child>>")
         else:
             extended_features.append(ppos + self.special_delimiter + cpos + self.special_delimiter + "<<parent>>")
+            extended_features.append(pword + self.special_delimiter + cword + self.special_delimiter + "<<parent>>")
+        if (parent_index + 1) < len(sentence) and (child_index-1) > -1:
+            pword_pwordplusone_cwordminusone_cword =self.special_delimiter.join((pword,sentence[parent_index+1]['token'],sentence[child_index-1]['token'],cword))
+            extended_features.append(pword_pwordplusone_cwordminusone_cword)
+        if (parent_index-1) > -1 and (child_index-1) > -1:
+            pwordminusone_pword_cwordminusone_cword =self.special_delimiter.join((sentence[parent_index-1]['token'],pword,sentence[child_index-1]['token'],cword))
+            extended_features.append(pwordminusone_pword_cwordminusone_cword)
+        if (parent_index+1) < len(sentence) and (child_index+1) < len(sentence):
+            pword_pwordplusone_cword_cwordpulsone = self.special_delimiter.join((pword,sentence[parent_index+1]['token'],cword,sentence[child_index+1]['token']))
+            extended_features.append(pword_pwordplusone_cword_cwordpulsone)
+        if (parent_index-1) > -1 and (child_index+1) < len(sentence):
+            pwordminusone_pword_cword_cwordplusone = self.special_delimiter.join((sentence[parent_index-1]['token'],pword,cword,sentence[child_index+1]['token']))
+            extended_features.append(pwordminusone_pword_cword_cwordplusone)
+
         return extended_features
 
 
@@ -152,7 +168,7 @@ class Feature_maker:
     def create_feature_vectors_for_all_training_sentences(self):
         dictionary = {}
         for index in self.train_data:
-            dictionary[index] = []#csr_matrix((1,self.dimensions))
+            dictionary[index] = []
             sentence = self.train_data[index]
 
             for word_index in sentence:
@@ -177,9 +193,9 @@ class Feature_maker:
         local_feature_dictionary = {}
         sentence = set[sentence_index]
         for word_index in sentence:
-            local_feature_dictionary[word_index]={}
+            local_feature_dictionary[word_index] = {}
             for word_index1 in sentence:
-                if word_index != word_index1:
+                if (word_index != word_index1) and (word_index1 != 0) :
                     pword = sentence[word_index]['token']
                     ppos= sentence[word_index]['token pos']
                     cword = sentence[word_index1]['token']
