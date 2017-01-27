@@ -26,25 +26,32 @@ class Feature_maker:
         relevant_features = []
 
         unigram_pword_ppos = "<<head>>" + pword + self.special_delimiter + ppos
-        #relevant_features.append(unigram_pword_ppos)
+        if not self.extended:
+            relevant_features.append(unigram_pword_ppos)
 
         unigram_pword = "<<head>>" + pword
-        #relevant_features.append(unigram_pword)
+        if not self.extended:
+            relevant_features.append(unigram_pword)
         unigram_ppos = "<<head>>" + ppos
         relevant_features.append(unigram_ppos)
 
         unigram_cword_cpos = "<<child>>" + cword + self.special_delimiter + cpos
-        #relevant_features.append(unigram_cword_cpos)
+        if not self.extended:
+            relevant_features.append(unigram_cword_cpos)
 
         unigram_cword = "<<child>>" + cword
-        #relevant_features.append(unigram_cword)
+        if not self.extended:
+            relevant_features.append(unigram_cword)
         unigram_cpos = "<<child>>"+cpos
         relevant_features.append(unigram_cpos)
 
         bigram_ppos_cword_cpos = "<<head>>" + ppos + self.special_delimiter + unigram_cword_cpos
         relevant_features.append(bigram_ppos_cword_cpos)
-        bigram_pword_ppos_cword = unigram_pword_ppos + self.special_delimiter + "<<child>>" + cword
-        relevant_features.append(bigram_pword_ppos_cword)
+        bigram_pword_ppos_cpos = self.special_delimiter.join((pword, ppos, cpos))
+        relevant_features.append(bigram_pword_ppos_cpos)
+        if self.extended:
+            bigram_pword_ppos_cword = unigram_pword_ppos + self.special_delimiter + "<<child>>" + cword
+            relevant_features.append(bigram_pword_ppos_cword)
         #bigram_ppos_cpos =  "<<head>>" + ppos + self.special_delimiter + "<<child>>"+cpos
         #relevant_features.append(bigram_ppos_cpos)
         return relevant_features
