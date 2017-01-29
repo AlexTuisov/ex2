@@ -99,15 +99,21 @@ def print_the_results(container_list):
                 if len(row) < 10:
                     output_file.write(row)
                     is_a_new_sentence = True
+                    continue
                 if is_a_new_sentence:
-                    mst_easy_lookup = {y.keys()[0]: x for x, y in container_list[numerator].items()}
+                    mst_easy_lookup = {}
+                    for x, y in container_list[numerator].items():
+                        list_of_keys = list(y.keys())
+                        for key in list_of_keys:
+                            mst_easy_lookup[key] = x
                     numerator += 1
                     is_a_new_sentence = False
                 split_old_row = row.split()
-                head = str(mst_easy_lookup[split_old_row[0]])
+                head = str(mst_easy_lookup[int(split_old_row[0])])
                 split_old_row[6] = head
                 to_write = "\t".join(split_old_row)
                 output_file.write(to_write)
+                output_file.write("\n")
 
 
 
