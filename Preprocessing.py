@@ -1,10 +1,11 @@
 import os
+import random
 
 
 def get_path(type_of_file):
     path = os.path.dirname(__file__)
-    print ("____")
-    print (path)
+    print("____")
+    print(path)
     if type_of_file == "test":
         absolute_path = os.path.join(path, "data/test.labeled")
     elif type_of_file == "train":
@@ -68,10 +69,14 @@ def get_file_as_dict(type_of_file):
                     numerator += 1
                     is_a_new_sentence = False
                 split_row = row.split()
+                if random.random() < 0.0001:
+                    print(row)
+                    print(split_row)
                 if split_row:
                     sentence_as_dictionary[int(split_row[0])] = {"token": split_row[1],
                                                                  "token pos": split_row[3]}
         return formatted_file, None
+
 
 def make_graph_for_sentence(sentence_as_dict):
     graph_as_dictionary = {}
@@ -85,4 +90,29 @@ def make_graph_for_sentence(sentence_as_dict):
         if key not in graph_as_dictionary:
             graph_as_dictionary[key] = {}
     return graph_as_dictionary
+
+
+def print_the_results(container_list):
+    with open(get_path("competition")) as input_file:
+        with open(get_path("answers"), "w") as output_file:
+            numerator = 0
+            mst_easy_lookup = None
+            is_a_new_sentence = True
+            for row in input_file:
+                if len(row) < 10:
+                    output_file.write(row)
+                    is_a_new_sentence = True
+                if is_a_new_sentence:
+                    mst_easy_lookup = {y.keys()[0]: x for x, y in container_list[numerator].items()}
+                    numerator += 1
+                    is_a_new_sentence = False
+                split_old_row = row.split()
+                head = str(mst_easy_lookup[split_old_row[0]])
+                split_old_row[6] = head
+                to_write = "\t".join(split_old_row)
+                output_file.write(to_write)
+
+
+
+
 
