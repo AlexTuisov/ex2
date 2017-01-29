@@ -22,11 +22,11 @@ def get_path(type_of_file):
 def get_file_as_dict(type_of_file):
     formatted_file = {}
     formatted_graph = {}
+    numerator = 0
     if type_of_file == "train" or type_of_file == "test":
         with open(get_path(type_of_file)) as unformatted_train_set:
             is_a_new_sentence = False
             sentence_as_dictionary = {}
-            numerator = 0
             for row in unformatted_train_set:
                 if len(row) < 10:
                     is_a_new_sentence = True
@@ -53,8 +53,25 @@ def get_file_as_dict(type_of_file):
                                                              "token head": int(split_row[6]),
                                                              "token child": []}
         return formatted_file, formatted_graph
+
     if type_of_file == "competition":
-        pass
+        with open(get_path(type_of_file)) as unformatted_competition_set:
+            is_a_new_sentence = False
+            sentence_as_dictionary = {}
+            for row in unformatted_competition_set:
+                if len(row) < 10:
+                    is_a_new_sentence = True
+                    sentence_as_dictionary[0] = {"token": "root", "token pos": "root"}
+                    formatted_file[numerator] = sentence_as_dictionary
+                if is_a_new_sentence:
+                    sentence_as_dictionary = {}
+                    numerator += 1
+                    is_a_new_sentence = False
+                split_row = row.split()
+                if split_row:
+                    sentence_as_dictionary[int(split_row[0])] = {"token": split_row[1],
+                                                                 "token pos": split_row[3]}
+        return formatted_file, None
 
 def make_graph_for_sentence(sentence_as_dict):
     graph_as_dictionary = {}
@@ -68,3 +85,4 @@ def make_graph_for_sentence(sentence_as_dict):
         if key not in graph_as_dictionary:
             graph_as_dictionary[key] = {}
     return graph_as_dictionary
+
