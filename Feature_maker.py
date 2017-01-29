@@ -52,8 +52,9 @@ class Feature_maker:
         if self.extended:
             bigram_pword_ppos_cword = unigram_pword_ppos + self.special_delimiter + "<<child>>" + cword
             relevant_features.append(bigram_pword_ppos_cword)
-        #bigram_ppos_cpos =  "<<head>>" + ppos + self.special_delimiter + "<<child>>"+cpos
-        #relevant_features.append(bigram_ppos_cpos)
+        if not self.extended:
+            bigram_ppos_cpos =  "<<head>>" + ppos + self.special_delimiter + "<<child>>"+cpos
+            relevant_features.append(bigram_ppos_cpos)
         return relevant_features
 
 

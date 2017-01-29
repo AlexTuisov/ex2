@@ -69,9 +69,6 @@ def get_file_as_dict(type_of_file):
                     numerator += 1
                     is_a_new_sentence = False
                 split_row = row.split()
-                if random.random() < 0.0001:
-                    print(row)
-                    print(split_row)
                 if split_row:
                     sentence_as_dictionary[int(split_row[0])] = {"token": split_row[1],
                                                                  "token pos": split_row[3]}
